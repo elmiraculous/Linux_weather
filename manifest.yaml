@@ -1,0 +1,32 @@
+servers:
+  hosts:
+    server:
+      ansible_host: 192.168.56.105
+      ansible_user: root
+      ansible_port: 22
+
+- name: Install Web Server
+  hosts: 192.168.56.105
+  become: true
+
+  task:
+    - name: Update apt packets
+      apt: update_cache: true
+      when: ansible_os_family == "Debian"
+    - name: Check HTTP Server
+      apt:
+        name: apache2
+        state: present
+        when: ansible_os_family == "Debian"
+    - name: Start HTTP Server
+      service:
+        name: apache2
+        state: started
+        when: ansible_os_family == "Debian"
+    - name: Enable mod_cgid
+      command: a2enmod cgi
+  handlers:
+    - name: Restart HTTP Server
+      service:
+        name: apache2
+        state: restared
